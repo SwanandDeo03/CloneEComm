@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laptop Store - View All Laptops</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .laptop-card {
+            transition: transform 0.3s;
+            height: 100%;
+        }
+        .laptop-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .price {
+            font-size: 1.25rem;
+            color: #B12704;
+            font-weight: bold;
+        }
+        .rating {
+            color: #FFA41C;
+        }
+        .filters {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+        }
+        .error-message {
+            color: #dc3545;
+            padding: 20px;
+            text-align: center;
+        }
+        .specs-table {
+            font-size: 0.9rem;
+        }
+        .specs-table td {
+            padding: 4px 8px;
+        }
+        .specs-table td:first-child {
+            font-weight: bold;
+            width: 140px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">Laptop Store</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Contact</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h1 class="mb-4">Available Laptops</h1>
+        
+        <div class="filters">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <div class="input-group">
+                        <input type="text" id="searchInput" class="form-control" placeholder="Search laptops by name, model, or series...">
+                        <button class="btn btn-outline-secondary" type="button" onclick="clearSearch()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <select id="sortSelect" class="form-select">
+                        <option value="">Sort by...</option>
+                        <option value="price-asc">Price: Low to High</option>
+                        <option value="price-desc">Price: High to Low</option>
+                        <option value="rating-desc">Highest Rated</option>
+                    </select>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <button onclick="fetchLaptops()" class="btn btn-primary w-100">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="loading" class="loading d-none">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+
+        <div id="errorMessage" class="error-message d-none"></div>
+
+        <div class="row" id="laptopGrid">
+            <!-- Laptops will be displayed here -->
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let allLaptops = []; // Store all laptops for filtering
+        let searchTimeout = null;
+
+        // Function to fetch laptops from the API
+        async function fetchLaptops() {
+            const loadingElement = document.getElementById('loading');
+            const errorElement = document.getElementById('errorMessage');
+            const laptopGrid = document.getElementById('laptopGrid');
+
+            try {
+                loadingElement.classList.remove('d-none');
+                errorElement.classList.add('d-none');
+                laptopGrid.innerHTML = '';
+
+                const response = await fetch('https://localhost:5500/api/Laptop/GetAll');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                allLaptops = data; // Store the data
+                displayLaptops(data);
+            } catch (error) {
+                console.error('Error:', error);
+                errorElement.textContent = 'Failed to load laptops. Please try again later.';
+                errorElement.classList.remove('d-none');
+            } finally {
+                loadingElement.classList.add('d-none');
+            }
+        }
+
+        // Function to search laptops from MySQL database
+        async function searchLaptops(searchTerm) {
+            const loadingElement = document.getElementById('loading');
+            const errorElement = document.getElementById('errorMessage');
+            const laptopGrid = document.getElementById('laptopGrid');
+
+            try {
+                if (!searchTerm.trim()) {
+                    displayLaptops(allLaptops);
+                    return;
+                }
+
+                loadingElement.classList.remove('d-none');
+                errorElement.classList.add('d-none');
+
+                const response = await fetch(`https://localhost:5500/api/Laptop/Search?searchTerm=${encodeURIComponent(searchTerm)}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const result = await response.json();
+                
+                if (result.success) {
+                    displayLaptops(result.data);
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                errorElement.textContent = 'Failed to search laptops. Please try again later.';
+                errorElement.classList.remove('d-none');
+                displayLaptops([]); // Clear the grid
+            } finally {
+                loadingElement.classList.add('d-none');
+            }
+        }
+
+        // Function to display laptops in the grid
+        function displayLaptops(laptops) {
+            const laptopGrid = document.getElementById('laptopGrid');
+            const sortOption = document.getElementById('sortSelect').value;
+
+            // Sort laptops if needed
+            if (sortOption) {
+                laptops.sort((a, b) => {
+                    switch (sortOption) {
+                        case 'price-asc':
+                            return a.Price - b.Price;
+                        case 'price-desc':
+                            return b.Price - a.Price;
+                        case 'rating-desc':
+                            return b.userrating - a.userrating;
+                        default:
+                            return 0;
+                    }
+                });
+            }
+
+            laptopGrid.innerHTML = laptops.map(laptop => `
+                <div class="col-12 mb-4">
+                    <div class="card laptop-card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <h4 class="card-title">${laptop.name || 'Unnamed Laptop'}</h4>
+                                    <div class="d-flex align-items-center mb-3">
+                                        <span class="price me-3">₹${laptop.price.toLocaleString()}</span>
+                                        <div class="rating">
+                                            ${getRatingStars(laptop.userrating)}
+                                            <span class="ms-1">(${laptop.userrating})</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 text-md-end">
+                                    <a href="${laptop.link}" target="_blank" class="btn btn-primary">
+                                        <i class="fas fa-external-link-alt"></i> View Details
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <table class="table specs-table">
+                                <tbody>
+                                    <tr>
+                                        <td>Model Number</td>
+                                        <td>${laptop.modelNumber || 'N/A'}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Part Number</td>
+                                        <td>${laptop.partNumber || 'N/A'}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Model Name</td>
+                                        <td>${laptop.modelName || 'N/A'}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Series</td>
+                                        <td>${laptop.series || 'N/A'}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Color</td>
+                                        <td>${laptop.color || 'N/A'}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Sales Package</td>
+                                        <td>${laptop.salesPackage || 'N/A'}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            if (laptops.length === 0) {
+                laptopGrid.innerHTML = '<div class="col-12 text-center">No laptops found matching your criteria.</div>';
+            }
+        }
+
+        // Function to generate rating stars
+        function getRatingStars(rating) {
+            const fullStars = Math.floor(rating);
+            const hasHalfStar = rating % 1 >= 0.5;
+            let stars = '';
+            
+            for (let i = 0; i < fullStars; i++) {
+                stars += '<i class="fas fa-star"></i>';
+            }
+            if (hasHalfStar) {
+                stars += '<i class="fas fa-star-half-alt"></i>';
+            }
+            const emptyStars = 5 - Math.ceil(rating);
+            for (let i = 0; i < emptyStars; i++) {
+                stars += '<i class="far fa-star"></i>';
+            }
+            
+            return stars;
+        }
+
+        // Function to clear search
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            displayLaptops(allLaptops);
+        }
+
+        // Event listeners for search and sort
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            // Clear previous timeout
+            if (searchTimeout) {
+                clearTimeout(searchTimeout);
+            }
+
+            // Set new timeout for search
+            searchTimeout = setTimeout(() => {
+                searchLaptops(e.target.value);
+            }, 300); // Wait 300ms after user stops typing
+        });
+
+        document.getElementById('sortSelect').addEventListener('change', () => {
+            const searchTerm = document.getElementById('searchInput').value;
+            if (searchTerm.trim()) {
+                searchLaptops(searchTerm);
+            } else {
+                displayLaptops(allLaptops);
+            }
+        });
+
+        // Load laptops when page loads
+        document.addEventListener('DOMContentLoaded', fetchLaptops);
+    </script>
+</body>
+</html> 

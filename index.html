@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amazon Clone</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <img src="images/amazon_logo.png" alt="Amazon Logo" />
+        </div>
+        <div class="search-bar">
+            <input type="text" placeholder="Search Amazon">
+            <button><i class="fas fa-search"></i></button>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html"><i class="fas fa-home"></i> Home</a></li>
+                <li><a href="products.html"><i class="fas fa-shopping-bag"></i> Products</a></li>
+                <li><a href="laptops.html"><i class="fas fa-laptop"></i> Laptops</a></li>
+                <li><a href="#"><i class="fas fa-user"></i> Account</a></li>
+                <li><a href="#"><i class="fas fa-return"></i> Returns</a></li>
+                <li><a href="#"><i class="fas fa-shopping-cart"></i> Cart</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="secondary-nav">
+        <ul>
+            <li><a href="products.html"><i class="fas fa-bars"></i> All Categories</a></li>
+            <li><a href="laptops.html"><i class="fas fa-laptop"></i> Laptops</a></li>
+            <li><a href="products.html?category=electronics"><i class="fas fa-laptop"></i> Electronics</a></li>
+            <li><a href="products.html?category=clothing"><i class="fas fa-tshirt"></i> Clothing</a></li>
+            <li><a href="#">Today's Deals</a></li>
+            <li><a href="#">Customer Service</a></li>
+            <li><a href="#">Registry</a></li>
+            <li><a href="#">Gift Cards</a></li>
+            <li><a href="#">Sell</a></li>
+        </ul>
+    </div>
+
+    <main>
+        <section class="hero">
+            <img src="images/hero.jpg" alt="Hero Image" class="hero-image">
+            <h1>Welcome to Amazon</h1>
+            <p>Shop the latest products at unbeatable prices!</p>
+            <button>Shop Now</button>
+        </section>
+
+        <section class="products">
+            <h2>Featured Products</h2>
+            <div class="product-grid" id="productGrid">
+                <!-- Products will be loaded here dynamically -->
+            </div>
+        </section>
+
+        <section class="deals">
+            <h2>Today's Deals</h2>
+            <div class="deals-grid" id="dealsGrid">
+                <!-- Deals will be loaded here dynamically -->
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Get to Know Us</h3>
+                <ul>
+                    <li><a href="#">Careers</a></li>
+                    <li><a href="#">Blog</a></li>
+                    <li><a href="#">About Amazon</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Make Money with Us</h3>
+                <ul>
+                    <li><a href="#">Sell products on Amazon</a></li>
+                    <li><a href="#">Sell on Amazon Business</a></li>
+                    <li><a href="#">Sell apps on Amazon</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Amazon Payment Products</h3>
+                <ul>
+                    <li><a href="#">Amazon Business Card</a></li>
+                    <li><a href="#">Shop with Points</a></li>
+                    <li><a href="#">Reload Your Balance</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2023 Amazon Clone. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Function to fetch and display products
+        async function loadProducts() {
+            try {
+                const response = await fetch('https://localhost:5500/api/products', {
+                    method: 'GET',
+                    mode: 'cors',
+                    credentials: 'include'
+                });
+                const products = await response.json();
+                const productGrid = document.getElementById('productGrid');
+                
+                products.forEach(product => {
+                    const productElement = document.createElement('div');
+                    productElement.className = 'product';
+                    productElement.innerHTML = `
+                        <img src="${product.image}" alt="${product.name}">
+                        <h3>${product.name}</h3>
+                        <p>$${product.price}</p>
+                        <button class="add-to-cart" onclick="addToCart(${product.id})">Add to Cart</button>
+                    `;
+                    productGrid.appendChild(productElement);
+                });
+            } catch (error) {
+                console.error('Error loading products:', error);
+            }
+        }
+
+        // Function to fetch and display deals
+        async function loadDeals() {
+            try {
+                const response = await fetch('https://localhost:5500/api/deals', {
+                    method: 'GET',
+                    mode: 'cors',
+                    credentials: 'include'
+                });
+                const deals = await response.json();
+                const dealsGrid = document.getElementById('dealsGrid');
+                
+                deals.forEach(deal => {
+                    const dealElement = document.createElement('div');
+                    dealElement.className = 'deal';
+                    dealElement.innerHTML = `
+                        <img src="${deal.image}" alt="${deal.title}">
+                        <div class="deal-info">
+                            <h3>${deal.title}</h3>
+                            <p>${deal.category}</p>
+                        </div>
+                    `;
+                    dealsGrid.appendChild(dealElement);
+                });
+            } catch (error) {
+                console.error('Error loading deals:', error);
+            }
+        }
+
+        // Function to add product to cart
+        async function addToCart(productId) {
+            try {
+                const response = await fetch('https://localhost:5500/api/cart', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    mode: 'cors',
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        productId: productId,
+                        quantity: 1
+                    })
+                });
+                const result = await response.json();
+                alert(result.message);
+            } catch (error) {
+                console.error('Error adding to cart:', error);
+            }
+        }
+
+        // Load products and deals when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProducts();
+            loadDeals();
+        });
+    </script>
+</body>
+</html>
