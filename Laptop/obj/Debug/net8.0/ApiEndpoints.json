@@ -1,0 +1,28 @@
+[
+  {
+    "ContainingType": "Laptop.Controllers.LaptopController",
+    "Method": "AddLaptop",
+    "RelativePath": "api/Laptop/Add",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "laptop",
+        "Type": "laptops.classes.LaptopClass",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Laptop.Controllers.LaptopController",
+    "Method": "GetAllLaptops",
+    "RelativePath": "api/Laptop/GetAll",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  }
+]

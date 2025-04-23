@@ -1,13 +1,13 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const https = require('https');
+const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const productsRouter = require('./products-api');
 
 const app = express();
-const port = 5500;
+const port = 5501;
 
 // SSL Configuration
 const sslOptions = {
@@ -312,5 +312,5 @@ const server = https.createServer(sslOptions, app);
 
 // Start server
 server.listen(port, () => {
-    console.log(`HTTPS Server running at https://localhost:${port}`);
+    console.log(`HTTPS Server running at http://localhost:${port}`);
 }); 

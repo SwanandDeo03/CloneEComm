@@ -43,12 +43,12 @@
     </div>
 
     <main>
-        <section class="hero">
-            <img src="images/hero.jpg" alt="Hero Image" class="hero-image">
+        <<section class="hero">
             <h1>Welcome to Amazon</h1>
             <p>Shop the latest products at unbeatable prices!</p>
             <button>Shop Now</button>
         </section>
+        
 
         <section class="products">
             <h2>Featured Products</h2>
@@ -101,7 +101,7 @@
         // Function to fetch and display products
         async function loadProducts() {
             try {
-                const response = await fetch('https://localhost:5500/api/products', {
+                const response = await fetch('http://localhost:5299/api/products', {
                     method: 'GET',
                     mode: 'cors',
                     credentials: 'include'
@@ -128,7 +128,7 @@
         // Function to fetch and display deals
         async function loadDeals() {
             try {
-                const response = await fetch('https://localhost:5500/api/deals', {
+                const response = await fetch('http://localhost:5299/api/deals', {
                     method: 'GET',
                     mode: 'cors',
                     credentials: 'include'
@@ -156,7 +156,7 @@
         // Function to add product to cart
         async function addToCart(productId) {
             try {
-                const response = await fetch('https://localhost:5500/api/cart', {
+                const response = await fetch('http://localhost:5299/api/cart', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

@@ -1,0 +1,6 @@
+@LaptopAPI_HostAddress = http://localhost:7273
+
+GET {{LaptopAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
