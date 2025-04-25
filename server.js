@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const http = require('http');
+const https = require('https');
 const fs = require('fs');
 const path = require('path');
 const productsRouter = require('./products-api');
@@ -312,5 +313,5 @@ const server = https.createServer(sslOptions, app);
 
 // Start server
 server.listen(port, () => {
-    console.log(`HTTPS Server running at http://localhost:${port}`);
+    console.log(`HTTPS Server running at https://localhost:${port}`);
 }); 
