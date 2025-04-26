@@ -1,8 +1,9 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const http = require('http');
-const apiRouter = require('./api');
+const http = require('http')
+const path = require('path');
+const apiRouter = require(path.join(__dirname, 'api'));
 
 const app = express();
 const port = process.env.PORT || 5501;
